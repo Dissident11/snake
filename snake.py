@@ -96,10 +96,10 @@ class Snake:
             self.x_vel = 0
 
         if pygame.time.get_ticks() - self.cooldown >= self.wait and self.moving and self.alive:
-            if self.start_body_lenght > 1:
+            if len(self.body_rects) > 1:
                 self.body_rects[-1:0:-1] = self.body_rects[-2::-1]
                 self.body_rects[0] = pygame.Rect(self.head_rect[0], self.head_rect[1], TILE_SIZE, TILE_SIZE)
-            elif self.start_body_lenght == 1:
+            elif len(self.body_rects) == 1:
                 self.body_rects[0] = pygame.Rect(self.head_rect[0], self.head_rect[1], TILE_SIZE, TILE_SIZE)
 
             self.head_rect.x += self.x_vel*TILE_SIZE
@@ -108,16 +108,43 @@ class Snake:
 
     def eat(self, target):
         self.target = target
+
         if self.head_rect.colliderect(self.target):
-            self.new_rect = self.body_rects[-1]
-            if self.x_vel == -1:
-                self.new_rect.x += TILE_SIZE
-            elif self.x_vel == 1:
-                self.new_rect.x -= TILE_SIZE
-            if self.y_vel == -1:
-                self.new_rect.y += TILE_SIZE
-            elif self.y_vel == 1:
-                self.new_rect.y -= TILE_SIZE
+
+            if len(self.body_rects) == 0:
+                self.new_rect = pygame.Rect(self.head_rect[0], self.head_rect[1], TILE_SIZE, TILE_SIZE)
+                if self.x_vel == -1:
+                    self.new_rect.x += TILE_SIZE
+                elif self.x_vel == 1:
+                    self.new_rect.x -= TILE_SIZE
+                if self.y_vel == -1:
+                    self.new_rect.y += TILE_SIZE
+                elif self.y_vel == 1:
+                    self.new_rect.y -= TILE_SIZE
+
+            elif len(self.body_rects) == 1:
+                self.new_rect = self.body_rects[-1]
+
+                if self.body_rects[-1].x == self.head_rect.x + TILE_SIZE:
+                    self.new_rect.x += TILE_SIZE
+                elif self.body_rects[-1].x == self.head_rect.x - TILE_SIZE:
+                    self.new_rect.x -= TILE_SIZE
+                if self.body_rects[-1].y == self.head_rect.y + TILE_SIZE:
+                    self.new_rect.y += TILE_SIZE
+                elif self.body_rects[-1].y == self.head_rect.y - TILE_SIZE:
+                    self.new_rect.y -= TILE_SIZE
+
+            elif len(self.body_rects) >= 2:
+                self.new_rect = self.body_rects[-1]
+
+                if self.body_rects[-1].x == self.body_rects[-2].x - TILE_SIZE:
+                    self.new_rect.x += TILE_SIZE
+                elif self.body_rects[-1].x == self.body_rects[-2].x + TILE_SIZE:
+                    self.new_rect.x -= TILE_SIZE
+                if self.body_rects[-1].y == self.body_rects[-2].y - TILE_SIZE:
+                    self.new_rect.y += TILE_SIZE
+                elif self.body_rects[-1].y == self.body_rects[-2].y + TILE_SIZE:
+                    self.new_rect.y -= TILE_SIZE
 
             self.body_rects.append(self.new_rect)
 
@@ -166,7 +193,7 @@ def main():
     run = True
 
     #snake instance
-    snake = Snake(5, RED, BLACK, SIDE_OFFSET + 10*TILE_SIZE, VERTICAL_OFFSET + 5*TILE_SIZE, 50)
+    snake = Snake(1, RED, BLACK, SIDE_OFFSET + 10*TILE_SIZE, VERTICAL_OFFSET + 5*TILE_SIZE, 150)
 
     #food instance
     food = Food(BLUE, 1000, snake.head_rect)
